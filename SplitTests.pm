@@ -12,6 +12,11 @@ use XML::LibXML;
 use SplitTests::TestResult;
 use SplitTests::TestResultList;
 
+use constant {
+    RESULT_FILE_PREFIX => 'junit_output_',
+    TEST_DIR => 't/',
+};
+
 main();
 
 sub main {
@@ -66,7 +71,7 @@ sub get_all_paths {
         if ($extention eq "t"){
             push @all_tests, $File::Find::name;
         }
-    }, no_chdir => 0}, 't/');
+    }, no_chdir => 0}, TEST_DIR);
     return \@all_tests;
 }
 
@@ -83,7 +88,7 @@ sub get_all_results_from_xml {
     my ($hosts) = @_;
     my @test_results = ();
     for my $host (@$hosts) {
-        my $hash_array_from_xml = read_results_from_xml("junit_output_${host}.xml");
+        my $hash_array_from_xml = read_results_from_xml(RESULT_FILE_PREFIX."${host}.xml");
         push(@test_results, @$hash_array_from_xml);
     }
     return \@test_results;
