@@ -69,6 +69,7 @@ sub get_all_paths {
     }, no_chdir => 0}, 't/');
     return \@all_tests;
 }
+
 sub _split_test_path_groups {
     my ($test_result_list, $all_paths) = @_;
 
@@ -112,7 +113,6 @@ sub read_results_from_xml {
     return \@hash_array;
 }
 
-# originally taken from App::Ikaros::IO
 sub read_file {
     my ($file_path) = @_;
     return unless -e $file_path;
@@ -122,7 +122,6 @@ sub read_file {
     return $content;
 }
 
-# originally taken from App::Ikaros::IO
 sub write_file {
     my ($file_path, $content) = @_;
     open my $fh, '>', $file_path;
@@ -130,8 +129,6 @@ sub write_file {
     close $fh;
 }
 
-
-# t_denco_service_story_to_category_list_t => "t/denco/service/story/to_category_list.t"
 sub mangled_name_to_test_path {
     my ($test_paths) = @_;
     my %mangled_name_to_test_path;
@@ -145,4 +142,5 @@ sub mangled_name_to_test_path {
     }
     return \%mangled_name_to_test_path;
 }
+
 1;
