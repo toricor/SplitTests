@@ -13,8 +13,9 @@ use SplitTests::TestResult;
 use SplitTests::TestResultList;
 
 use constant {
-    RESULT_FILE_PREFIX => 'junit_output',
-    TEST_DIR => 't/',
+    TEST_RESULT_FILE_PREFIX => 'junit_output',
+    TEST_DIR                => 't/',
+    OUTPUT_PREFIX           => 'test_targets',
 };
 
 use Mouse;
@@ -80,7 +81,7 @@ sub _output_result {
     if ($self->print_only) {
         say $joined_paths;
     } else {    
-        $self->_write_file('test_targets_'.$host, $joined_paths);
+        $self->_write_file(OUTPUT_PREFIX."_$host", $joined_paths);
     }
 };
 
@@ -115,7 +116,7 @@ sub _get_all_results_from_xml {
     my ($self, $hosts) = @_;
     my @test_results = ();
     for my $host (@$hosts) {
-        my $hash_array_from_xml = $self->_read_results_from_xml(RESULT_FILE_PREFIX."_${host}.xml");
+        my $hash_array_from_xml = $self->_read_results_from_xml(TEST_RESULT_FILE_PREFIX."_${host}.xml");
         push(@test_results, @$hash_array_from_xml);
     }
     return \@test_results;
