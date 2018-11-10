@@ -7,8 +7,8 @@ use utf8;
 use Mouse;
 
 has test_results => (
-    is      => 'ro',
-    isa     => 'ArrayRef[SplitTests::TestResult]',
+    is       => 'ro',
+    isa      => 'ArrayRef[SplitTests::TestResult]',
     required => 1,
 );
 

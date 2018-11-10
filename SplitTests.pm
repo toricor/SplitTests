@@ -13,7 +13,7 @@ use SplitTests::TestResult;
 use SplitTests::TestResultList;
 
 use constant {
-    RESULT_FILE_PREFIX => 'junit_output_',
+    RESULT_FILE_PREFIX => 'junit_output',
     TEST_DIR => 't/',
 };
 
@@ -88,7 +88,7 @@ sub get_all_results_from_xml {
     my ($hosts) = @_;
     my @test_results = ();
     for my $host (@$hosts) {
-        my $hash_array_from_xml = read_results_from_xml(RESULT_FILE_PREFIX."${host}.xml");
+        my $hash_array_from_xml = read_results_from_xml(RESULT_FILE_PREFIX."_${host}.xml");
         push(@test_results, @$hash_array_from_xml);
     }
     return \@test_results;
