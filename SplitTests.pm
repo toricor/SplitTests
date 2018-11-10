@@ -30,7 +30,7 @@ has print_only => (
     default => 0, 
 );
 
-# all test paths in TEST_DIR
+# all test file paths in TEST_DIR
 has _all_paths => (
     is       => 'ro',
     isa      => 'ArrayRef[Str]',
@@ -45,7 +45,7 @@ has _mangled_name_to_test_path => (
 
 sub run {
     my ($self) = @_;
-    my @hosts = split(',', $self->hosts );
+    my @hosts = split(',', $self->hosts);
     my $test_result_list = SplitTests::TestResultList->new(
         test_results => [ map {
             SplitTests::TestResult->new(
@@ -61,7 +61,7 @@ sub run {
     my ($sorted_result_test_paths, $not_in_result_test_paths) = $self->_split_test_path_groups($test_result_list);
 
     my $i = 0;
-    my @paths = part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, shuffle @$not_in_result_test_paths);
+    my @paths = shuffle part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, shuffle @$not_in_result_test_paths);
     for my $idx (0..$#hosts) {
         my $paths_for_host = $paths[$idx];
         my $joined_paths = join(' ', shuffle @$paths_for_host);
