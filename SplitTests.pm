@@ -37,7 +37,7 @@ has _all_paths => (
     builder  => sub { $_[0]->_get_all_test_paths(TEST_DIR) },
 );
 
-has mangled_name_to_test_path => (
+has _mangled_name_to_test_path => (
     is      => 'ro',
     isa     => 'HashRef',
     builder => sub { $_[0]->_make_mangled_name_to_test_path($_[0]->_all_paths) },
@@ -45,12 +45,12 @@ has mangled_name_to_test_path => (
 
 sub run {
     my ($self) = @_;
-    my @hosts = split(',', $self->hosts);
+    my @hosts = split(',', $self->hosts );
     my $test_result_list = SplitTests::TestResultList->new(
         test_results => [ map {
             SplitTests::TestResult->new(
                 mangled_name => $_->{name},
-                test_path    => ${$self->mangled_name_to_test_path}{$_->{name}},
+                test_path    => ${$self->_mangled_name_to_test_path}{$_->{name}},
                 time         => $_->{time},
             )
         } grep {
