@@ -2,6 +2,7 @@ package SplitTests;
 use strict;
 use warnings;
 use utf8;
+use feature qw/say/;
 use version; our $VERSION = version->declare('v0.0.1');
 
 use File::Find;
@@ -20,18 +21,21 @@ use constant {
 main();
 
 sub main {
+    
     GetOptions(
         \my %opt, qw/
             hosts=s
+            print_only
         /
     );
+    
     unless ($opt{'hosts'}) {
         warn "hosts are needed";
         return
     }
     my $all_paths = SplitTests->get_all_paths();
     unless (scalar(@$all_paths)) {
-        warn "test directory was not detected";
+        warn "test directory is not detected";
         return
     }
     
@@ -57,7 +61,11 @@ sub main {
     for my $idx (0..$#hosts) {
         my $paths_for_host = $paths[$idx];
         my $joined_paths = join(' ', shuffle @$paths_for_host);
-        write_file('test_targets_'.$hosts[$idx], $joined_paths);
+        if (exists $opt{print_only} && $opt{print_only}) {
+            say $joined_paths;
+        } else {    
+            write_file('test_targets_'.$hosts[$idx], $joined_paths);
+        }
     }
 }
 
