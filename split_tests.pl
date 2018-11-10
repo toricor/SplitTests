@@ -11,7 +11,7 @@ GetOptions(
     /
 );
 
-my $instance = SplitTests->new(+{
+SplitTests->new(+{
     hosts      => $opt{'hosts'},
     print_only => $opt{'print_only'},
 })->run();

@@ -57,21 +57,32 @@ sub run {
             exists $self->_mangled_name_to_test_path->{$_->{name}} # acquire tests in t/
         } @{$self->_get_all_results_from_xml(\@hosts)}]
     );
-
+    
     my ($sorted_result_test_paths, $not_in_result_test_paths) = $self->_split_test_path_groups($test_result_list);
 
     my $i = 0;
-    my @paths = shuffle part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, shuffle @$not_in_result_test_paths);
+    my $path_groups = $self->_shuffle([ part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, @{$self->_shuffle($not_in_result_test_paths)}) ]);
+    
     for my $idx (0..$#hosts) {
-        my $paths_for_host = $paths[$idx];
+        my $paths_for_host = $path_groups->[$idx];
         my $joined_paths = join(' ', shuffle @$paths_for_host);
-        if ($self->print_only) {
-            say $joined_paths;
-        } else {    
-            $self->_write_file('test_targets_'.$hosts[$idx], $joined_paths);
-        }
+        $self->_output_result($hosts[$idx], $joined_paths);
     }
 }
+
+sub _shuffle {
+    my ($self, $targets) = @_;
+    return [ shuffle @$targets ];
+}
+
+sub _output_result {
+    my ($self, $host, $joined_paths) = @_;
+    if ($self->print_only) {
+        say $joined_paths;
+    } else {    
+        $self->_write_file('test_targets_'.$host, $joined_paths);
+    }
+};
 
 sub _get_all_test_paths {
     my ($self, $test_dirs) = @_;

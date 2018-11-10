@@ -1,5 +1,24 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
+  Class-Load-0.25
+    pathname: E/ET/ETHER/Class-Load-0.25.tar.gz
+    provides:
+      Class::Load 0.25
+      Class::Load::PP 0.25
+    requirements:
+      Carp 0
+      Data::OptList 0.110
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Module::Implementation 0.04
+      Module::Runtime 0.012
+      Package::Stash 0.14
+      Scalar::Util 0
+      Try::Tiny 0
+      base 0
+      perl 5.006
+      strict 0
+      warnings 0
   Data-Dump-1.23
     pathname: G/GA/GAAS/Data-Dump-1.23.tar.gz
     provides:
@@ -14,6 +33,17 @@ DISTRIBUTIONS
       Symbol 0
       Test 0
       perl 5.006
+  Data-OptList-0.110
+    pathname: R/RJ/RJBS/Data-OptList-0.110.tar.gz
+    provides:
+      Data::OptList 0.110
+    requirements:
+      ExtUtils::MakeMaker 0
+      List::Util 0
+      Params::Util 0
+      Sub::Install 0.921
+      strict 0
+      warnings 0
   Devel-CheckCompiler-0.07
     pathname: S/SY/SYOHEX/Devel-CheckCompiler-0.07.tar.gz
     provides:
@@ -315,6 +345,28 @@ DISTRIBUTIONS
       XSLoader 0
       strict 0
       warnings 0
+  Params-Util-1.07
+    pathname: A/AD/ADAMK/Params-Util-1.07.tar.gz
+    provides:
+      Params::Util 1.07
+    requirements:
+      ExtUtils::CBuilder 0.27
+      ExtUtils::MakeMaker 6.52
+      File::Spec 0.80
+      Scalar::Util 1.18
+      Test::More 0.42
+      perl 5.00503
+  Sub-Install-0.928
+    pathname: R/RJ/RJBS/Sub-Install-0.928.tar.gz
+    provides:
+      Sub::Install 0.928
+    requirements:
+      B 0
+      Carp 0
+      ExtUtils::MakeMaker 6.30
+      Scalar::Util 0
+      strict 0
+      warnings 0
   Test-Deep-1.128
     pathname: R/RJ/RJBS/Test-Deep-1.128.tar.gz
     provides:
@@ -374,6 +426,20 @@ DISTRIBUTIONS
       List::Util 1.09
       Scalar::Util 1.09
       Test::Builder 0
+  Test-Mock-Guard-0.10
+    pathname: X/XA/XAICRON/Test-Mock-Guard-0.10.tar.gz
+    provides:
+      Test::Mock::Guard 0.10
+    requirements:
+      CPAN::Meta 0
+      CPAN::Meta::Prereqs 0
+      Class::Load 0.06
+      Exporter 5.63
+      ExtUtils::CBuilder 0
+      ExtUtils::MakeMaker 6.59
+      Module::Build 0.38
+      Test::More 0.96
+      perl 5.008001
   Test-Spec-0.54
     pathname: A/AK/AKZHAN/Test-Spec-0.54.tar.gz
     provides:
