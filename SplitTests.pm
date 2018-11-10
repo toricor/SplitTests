@@ -7,7 +7,6 @@ use version; our $VERSION = version->declare('v0.0.1');
 
 use File::Find;
 use List::AllUtils qw/part shuffle/;
-use Getopt::Long qw(:config posix_default no_ignore_case gnu_compat);
 use XML::LibXML;
 
 use SplitTests::TestResult;
@@ -18,59 +17,66 @@ use constant {
     TEST_DIR => 't/',
 };
 
-main();
+use Mouse;
+has hosts => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    builder  => sub { split(',', $_[1])},
+    required => 1,
+);
 
-sub main {
-    GetOptions(
-        \my %opt, qw/
-            hosts=s
-            print_only
-        /
-    );
-    
-    unless ($opt{'hosts'}) {
-        warn "hosts are needed";
-        return
-    }
-    my $all_paths = SplitTests->get_all_paths();
-    unless (scalar(@$all_paths)) {
-        warn "test directory is not detected";
-        return
-    }
-    
-    my @hosts = split(',', $opt{'hosts'});
-    my $mangled_name_to_test_path = SplitTests->mangled_name_to_test_path($all_paths);
+has print_only => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 0, 
+);
 
+# all test paths in TEST_DIR
+has _all_paths => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    builder  => sub { $_[0]->_get_all_test_paths(TEST_DIR) },
+);
+
+has mangled_name_to_test_path => (
+    is      => 'ro',
+    isa     => 'HashRef',
+    builder => sub { $_[0]->_make_mangled_name_to_test_path($_[0]->_all_paths) },
+);
+
+sub run {
+    my ($self) = @_;
+    my @hosts = @{$self->hosts};
     my $test_result_list = SplitTests::TestResultList->new(
         test_results => [ map {
             SplitTests::TestResult->new(
                 mangled_name => $_->{name},
-                test_path    => $mangled_name_to_test_path->{$_->{name}},
+                test_path    => ${$self->mangled_name_to_test_path}{$_->{name}},
                 time         => $_->{time},
             )
         } grep {
-            exists $mangled_name_to_test_path->{$_->{name}} # acquire tests in t/
-        } @{SplitTests->get_all_results_from_xml(\@hosts)}]
+            exists $self->_mangled_name_to_test_path->{$_->{name}} # acquire tests in t/
+        } @{$self->_get_all_results_from_xml(\@hosts)}]
     );
 
-    my ($sorted_result_test_paths, $not_in_result_test_paths) = SplitTests->_split_test_path_groups($test_result_list, $all_paths);
+    my ($sorted_result_test_paths, $not_in_result_test_paths) = $self->_split_test_path_groups($test_result_list);
 
     my $i = 0;
     my @paths = part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, shuffle @$not_in_result_test_paths);
     for my $idx (0..$#hosts) {
         my $paths_for_host = $paths[$idx];
         my $joined_paths = join(' ', shuffle @$paths_for_host);
-        if (exists $opt{print_only} && $opt{print_only}) {
+        if ($self->print_only) {
             say $joined_paths;
         } else {    
-            SplitTests->write_file('test_targets_'.$hosts[$idx], $joined_paths);
+            $self->_write_file('test_targets_'.$hosts[$idx], $joined_paths);
         }
     }
 }
 
-sub get_all_paths {
-    my ($self) = @_;
-    my @all_tests;
+sub _get_all_test_paths {
+    my ($self, $test_dirs) = @_;
+    my @all_tests = ();
     find({ wanted => sub {
         -f $_ or return;
         my @splited = split(/\./, $_);
@@ -80,31 +86,34 @@ sub get_all_paths {
             push @all_tests, $File::Find::name;
         }
     }, no_chdir => 0}, TEST_DIR);
+    unless (scalar(@all_tests)) {
+        die "no test file is detected";
+    }
     return \@all_tests;
 }
 
 sub _split_test_path_groups {
-    my ($self, $test_result_list, $all_paths) = @_;
+    my ($self, $test_result_list) = @_;
 
     my @sorted_result_test_paths = map {$_->test_path} sort {$a->time <=> $b->time} @{$test_result_list->test_results};
     my %result_test_path_hash    = map {$_ => 1} @sorted_result_test_paths;
-    my @not_in_result_test_paths = grep {not exists $result_test_path_hash{$_}} @$all_paths;
+    my @not_in_result_test_paths = grep {not exists $result_test_path_hash{$_}} @{$self->_all_paths};
     return (\@sorted_result_test_paths, \@not_in_result_test_paths);
 }
 
-sub get_all_results_from_xml {
+sub _get_all_results_from_xml {
     my ($self, $hosts) = @_;
     my @test_results = ();
     for my $host (@$hosts) {
-        my $hash_array_from_xml = SplitTests->read_results_from_xml(RESULT_FILE_PREFIX."_${host}.xml");
+        my $hash_array_from_xml = $self->_read_results_from_xml(RESULT_FILE_PREFIX."_${host}.xml");
         push(@test_results, @$hash_array_from_xml);
     }
     return \@test_results;
 }
 
-sub read_results_from_xml {
+sub _read_results_from_xml {
     my ($self, $file_path) = @_;
-    my $content = SplitTests->read_file($file_path);
+    my $content = $self->_read_file($file_path);
     return [] unless $content;
 
     $content =~ s|<system-out>(.*?)</system-out>|<system-out></system-out>|smg;
@@ -126,7 +135,7 @@ sub read_results_from_xml {
     return \@hash_array;
 }
 
-sub read_file {
+sub _read_file {
     my ($self, $file_path) = @_;
     return unless -e $file_path;
     open my $fh, '<', $file_path;
@@ -135,14 +144,14 @@ sub read_file {
     return $content;
 }
 
-sub write_file {
+sub _write_file {
     my ($self, $file_path, $content) = @_;
     open my $fh, '>', $file_path;
     print $fh $content;
     close $fh;
 }
 
-sub mangled_name_to_test_path {
+sub _make_mangled_name_to_test_path {
     my ($self, $test_paths) = @_;
     my %mangled_name_to_test_path;
     for my $test_path (@$test_paths) {
@@ -156,4 +165,6 @@ sub mangled_name_to_test_path {
     return \%mangled_name_to_test_path;
 }
 
+no Mouse;
+__PACKAGE__->meta->make_immutable();
 1;
