@@ -11,8 +11,7 @@ GetOptions(
     /
 );
 
-my @hosts = split(',', $opt{'hosts'});
 my $status = SplitTests->new(+{
-    hosts      => \@hosts,
+    hosts      => $opt{'hosts'},
     print_only => $opt{'print_only'},
 })->run();

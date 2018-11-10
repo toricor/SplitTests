@@ -20,8 +20,7 @@ use constant {
 use Mouse;
 has hosts => (
     is       => 'ro',
-    isa      => 'ArrayRef[Str]',
-    builder  => sub { split(',', $_[1])},
+    isa      => 'Str',
     required => 1,
 );
 
@@ -46,7 +45,7 @@ has mangled_name_to_test_path => (
 
 sub run {
     my ($self) = @_;
-    my @hosts = @{$self->hosts};
+    my @hosts = split(',', $self->hosts);
     my $test_result_list = SplitTests::TestResultList->new(
         test_results => [ map {
             SplitTests::TestResult->new(
