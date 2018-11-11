@@ -136,7 +136,6 @@ sub _read_results_from_xml {
         warn "$file_path cannot parse as valid XML";
         return [];
     }
-
     my @nodelist = $doc->getElementsByTagName('testsuite');
     my @hash_array = ();
     for my $node (@nodelist) {

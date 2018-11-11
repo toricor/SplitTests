@@ -38,7 +38,7 @@ describe 'split_tests' => sub {
                  }, +{ 
                      errors   => 0,
                      failures => 0,
-                     name     => "t_create_t",
+                     name     => "t_create_t", # contained only in the previous test result
                      skipped  => 0,
                      tests    => 7,
                      time     => 15.0,
