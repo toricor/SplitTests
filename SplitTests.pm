@@ -9,14 +9,15 @@ use File::Find;
 use List::AllUtils qw/part shuffle/;
 use XML::LibXML;
 
+use SplitTests::IO;
 use SplitTests::TestResult;
 use SplitTests::TestResultList;
 
 use constant {
     TEST_RESULT_FILE_PREFIX => 'junit_output',
-    TEST_DIR                => 't/',
     OUTPUT_PREFIX           => 'test_targets',
 };
+my @TEST_DIRS = ('t/');
 
 use Mouse;
 has hosts => (
@@ -35,7 +36,7 @@ has print_only => (
 has _all_paths => (
     is       => 'ro',
     isa      => 'ArrayRef[Str]',
-    builder  => sub { $_[0]->_get_all_test_paths(TEST_DIR) },
+    builder  => sub { $_[0]->_get_all_test_paths(\@TEST_DIRS) },
 );
 
 has _mangled_name_to_test_path => (
@@ -81,7 +82,7 @@ sub _output_result {
     if ($self->print_only) {
         say $joined_paths;
     } else {    
-        $self->_write_file(OUTPUT_PREFIX."_$host", $joined_paths);
+        SplitTests::IO->write_file(OUTPUT_PREFIX."_$host", $joined_paths);
     }
 };
 
@@ -96,7 +97,7 @@ sub _get_all_test_paths {
         if ($extention eq "t"){
             push @all_tests, $File::Find::name;
         }
-    }, no_chdir => 0}, TEST_DIR);
+    }, no_chdir => 0}, @$test_dirs);
     unless (scalar(@all_tests)) {
         die "no test file is detected";
     }
@@ -124,7 +125,7 @@ sub _get_all_results_from_xml {
 
 sub _read_results_from_xml {
     my ($self, $file_path) = @_;
-    my $content = $self->_read_file($file_path);
+    my $content = SplitTests::IO->read_file($file_path);
     return [] unless $content;
 
     $content =~ s|<system-out>(.*?)</system-out>|<system-out></system-out>|smg;
@@ -145,21 +146,6 @@ sub _read_results_from_xml {
     return \@hash_array;
 }
 
-sub _read_file {
-    my ($self, $file_path) = @_;
-    return unless -e $file_path;
-    open my $fh, '<', $file_path;
-    my $content = do { local $/; <$fh> };
-    close $fh;
-    return $content;
-}
-
-sub _write_file {
-    my ($self, $file_path, $content) = @_;
-    open my $fh, '>', $file_path;
-    print $fh $content;
-    close $fh;
-}
 
 sub _make_mangled_name_to_test_path {
     my ($self, $test_paths) = @_;
