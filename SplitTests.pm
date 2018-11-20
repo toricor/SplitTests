@@ -36,13 +36,19 @@ has print_only => (
 has _all_paths => (
     is       => 'ro',
     isa      => 'ArrayRef[Str]',
-    builder  => sub { $_[0]->_get_all_test_paths(\@TEST_DIRS) },
+    builder  => sub {
+        my $self = shift;
+        $self->_get_all_test_paths(\@TEST_DIRS)
+    },
 );
 
 has _mangled_name_to_test_path => (
     is      => 'ro',
     isa     => 'HashRef',
-    builder => sub { $_[0]->_make_mangled_name_to_test_path($_[0]->_all_paths) },
+    builder => sub {
+        my $self = shift;
+        $self->_make_mangled_name_to_test_path($self->_all_paths)
+    },
 );
 
 sub run {
@@ -163,4 +169,5 @@ sub _make_mangled_name_to_test_path {
 
 no Mouse;
 __PACKAGE__->meta->make_immutable();
+
 1;
