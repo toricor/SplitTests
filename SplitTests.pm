@@ -152,7 +152,6 @@ sub _read_results_from_xml {
     return \@hash_array;
 }
 
-
 sub _make_mangled_name_to_test_path {
     my ($self, $test_paths) = @_;
     my %mangled_name_to_test_path;

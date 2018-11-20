@@ -7,7 +7,7 @@ describe '_read_results_from_xml' => sub {
         my $hash_array;
         before each => sub {
             my $xml = undef; 
-            my $read_file_guard = mock_guard('SplitTests', +{ _read_file => sub { $xml }});
+            my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
             $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
         };
         it 'should return empty arrayref' => sub {
@@ -26,7 +26,7 @@ describe '_read_results_from_xml' => sub {
 </testsuites>
 EOT
 ;
-            my $read_file_guard = mock_guard('SplitTests', +{ _read_file => sub { $xml }});
+            my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
             $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
         };
         it 'should return empty arrayref' => sub {
@@ -63,7 +63,7 @@ ok 3 - L41: FUGA
 </testsuites>
 EOT
 ;
-            my $read_file_guard = mock_guard('SplitTests', +{ _read_file => sub { $xml }});
+            my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
             $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
         };
         it 'should return valid hash array' => sub {
