@@ -2,13 +2,17 @@ use Test::Spec;
 use Test::Mock::Guard qw/mock_guard/;
 use SplitTests; 
 
+use constant {
+    TEST_RESULT_FILE_PREFIX => 'junit_output',
+};
+
 describe '_read_results_from_xml' => sub {
     context 'xml file does not contain any data' => sub {
         my $hash_array;
         before each => sub {
             my $xml = undef; 
             my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
-            $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
+            $hash_array = SplitTests->_read_results_from_xml(TEST_RESULT_FILE_PREFIX.'0.xml');
         };
         it 'should return empty arrayref' => sub {
             is @$hash_array, 0;
@@ -27,7 +31,7 @@ describe '_read_results_from_xml' => sub {
 EOT
 ;
             my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
-            $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
+            $hash_array = SplitTests->_read_results_from_xml(TEST_RESULT_FILE_PREFIX.'1.xml');
         };
         it 'should return empty arrayref' => sub {
             is @$hash_array, 0;
@@ -64,7 +68,7 @@ ok 3 - L41: FUGA
 EOT
 ;
             my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
-            $hash_array = SplitTests->_read_results_from_xml('sample_master.xml');
+            $hash_array = SplitTests->_read_results_from_xml(TEST_RESULT_FILE_PREFIX.'1.xml');
         };
         it 'should return valid hash array' => sub {
             cmp_deeply $hash_array, [+{
