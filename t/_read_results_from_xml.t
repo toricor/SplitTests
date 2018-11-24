@@ -31,6 +31,7 @@ describe '_read_results_from_xml' => sub {
 EOT
 ;
             my $read_file_guard = mock_guard('SplitTests::IO', +{ read_file => sub { $xml }});
+            local $SIG{__WARN__} = sub {};
             $hash_array = SplitTests->_read_results_from_xml(TEST_RESULT_FILE_PREFIX.'1.xml');
         };
         it 'should return empty arrayref' => sub {
