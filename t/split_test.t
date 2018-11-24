@@ -38,7 +38,7 @@ describe 'split_tests' => sub {
                  }, +{ 
                      errors   => 0,
                      failures => 0,
-                     name     => "t_create_t", # contained only in the previous test result
+                     name     => "t_contained_only_in_previous_test_t",
                      skipped  => 0,
                      tests    => 7,
                      time     => 15.0,
@@ -67,26 +67,26 @@ describe 'split_tests' => sub {
         }});
 
         SplitTests->new(+{
-            hosts      => 'master,slave1,slave2a',
+            host_count => 3,
             print_only => 1,
         })->run();
     };
     
     it 'should split tests into roughly correct size groups' => sub {
-        my @test_targets_master  = split(' ', $host_to_joined_paths{master});
-        my @test_targets_slave1  = split(' ', $host_to_joined_paths{slave1});
-        my @test_targets_slave2a = split(' ', $host_to_joined_paths{slave2a});
-        cmp_bag \@test_targets_master, [
+        my @test_targets_0 = split(' ', $host_to_joined_paths{0});
+        my @test_targets_1 = split(' ', $host_to_joined_paths{1});
+        my @test_targets_2 = split(' ', $host_to_joined_paths{2});
+        cmp_bag \@test_targets_0, [
             't/delete.t',                          # 3.0 
             't/edit.t',                            # 20.0
             't/not_existed_in_previous_result3.t', # no data
         ];
-        cmp_bag \@test_targets_slave1, [
+        cmp_bag \@test_targets_1, [
             't/add.t',                             # 5.0
             't/not_existed_in_previous_result1.t', # no data
             't/not_existed_in_previous_result4.t', # no data
         ];
-        cmp_bag \@test_targets_slave2a, [
+        cmp_bag \@test_targets_2, [
             't/lookup.t',                          # 10.0
             't/not_existed_in_previous_result2.t', # no data
         ];

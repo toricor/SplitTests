@@ -20,9 +20,9 @@ use constant {
 my @TEST_DIRS = ('t/');
 
 use Mouse;
-has hosts => (
+has host_count => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => 'Int',
     required => 1,
 );
 
@@ -53,7 +53,7 @@ has _mangled_name_to_test_path => (
 
 sub run {
     my ($self) = @_;
-    my @hosts = split(',', $self->hosts);
+    my $host_count = $self->host_count;
     my $test_result_list = SplitTests::TestResultList->new(
         test_results => [ map {
             SplitTests::TestResult->new(
@@ -63,18 +63,17 @@ sub run {
             )
         } grep {
             exists $self->_mangled_name_to_test_path->{$_->{name}} # acquire tests in t/
-        } @{$self->_get_all_results_from_xml(\@hosts)}]
+        } @{$self->_get_all_results_from_xml($host_count)}]
     );
-    
-    my ($sorted_result_test_paths, $not_in_result_test_paths) = $self->_split_test_path_groups($test_result_list);
-
+    my ($sorted_result_test_paths, $not_in_result_test_paths) = $self->_divide_test_path_groups($test_result_list);
+ 
     my $i = 0;
-    my $path_groups = $self->_shuffle([ part { $i++ % scalar(@hosts)} (@$sorted_result_test_paths, @{$self->_shuffle($not_in_result_test_paths)}) ]);
-    
-    for my $idx (0..$#hosts) {
+    my $path_groups = $self->_shuffle([ part { $i++ % $host_count } (@$sorted_result_test_paths, @{$self->_shuffle($not_in_result_test_paths)}) ]);
+
+    for my $idx (0..$host_count - 1) {
         my $paths_for_host = $path_groups->[$idx];
         my $joined_paths = join(' ', shuffle @$paths_for_host);
-        $self->_output_result($hosts[$idx], $joined_paths);
+        $self->_output_result($idx, $joined_paths);
     }
 }
 
@@ -84,11 +83,11 @@ sub _shuffle {
 }
 
 sub _output_result {
-    my ($self, $host, $joined_paths) = @_;
+    my ($self, $idx, $joined_paths) = @_;
     if ($self->print_only) {
         say $joined_paths;
     } else {    
-        SplitTests::IO->write_file(OUTPUT_PREFIX."_$host", $joined_paths);
+        SplitTests::IO->write_file(OUTPUT_PREFIX."_$idx", $joined_paths);
     }
 };
 
@@ -110,7 +109,7 @@ sub _get_all_test_paths {
     return \@all_tests;
 }
 
-sub _split_test_path_groups {
+sub _divide_test_path_groups {
     my ($self, $test_result_list) = @_;
 
     my @sorted_result_test_paths = map {$_->test_path} sort {$a->time <=> $b->time} @{$test_result_list->test_results};
@@ -120,10 +119,10 @@ sub _split_test_path_groups {
 }
 
 sub _get_all_results_from_xml {
-    my ($self, $hosts) = @_;
+    my ($self, $host_count) = @_;
     my @test_results = ();
-    for my $host (@$hosts) {
-        my $hash_array_from_xml = $self->_read_results_from_xml(TEST_RESULT_FILE_PREFIX."_${host}.xml");
+    for my $idx (0..$host_count) {
+        my $hash_array_from_xml = $self->_read_results_from_xml(TEST_RESULT_FILE_PREFIX."_${idx}.xml");
         push(@test_results, @$hash_array_from_xml);
     }
     return \@test_results;
