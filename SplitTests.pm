@@ -15,7 +15,7 @@ use SplitTests::TestResultList;
 
 use constant {
     TEST_RESULT_FILE_PREFIX => 'junit_output',
-    OUTPUT_PREFIX           => 'test_targets',
+    OUTPUT_PREFIX           => 'inclusions',
 };
 my @TEST_DIRS = ('t/');
 
@@ -72,7 +72,7 @@ sub run {
 
     for my $idx (0..$host_count - 1) {
         my $paths_for_host = $path_groups->[$idx];
-        my $joined_paths = join(' ', shuffle @$paths_for_host);
+        my $joined_paths = join("\n", shuffle @$paths_for_host);
         $self->_output_result($idx, $joined_paths);
     }
 }
@@ -87,7 +87,7 @@ sub _output_result {
     if ($self->print_only) {
         say $joined_paths;
     } else {    
-        SplitTests::IO->write_file(OUTPUT_PREFIX."_$idx", $joined_paths);
+        SplitTests::IO->write_file(OUTPUT_PREFIX."_$idx".'.txt', $joined_paths);
     }
 };
 
